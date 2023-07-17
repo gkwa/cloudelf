@@ -58,7 +58,7 @@ func formatDuration(duration time.Duration, suffix string) string {
 func remainingTime() string {
 	remaining := expectedTimeDuration - time.Since(startTime)
 
-	suffix := "left"
+	suffix := "remaining"
 	if remaining < 0 {
 		suffix = "ago"
 	}
@@ -121,11 +121,16 @@ func fetch(url string) {
 }
 
 func main() {
-	flag.StringVar(&url, "url", "https://northflier4.streambox.com/light/light_status.php", "URL to fetch")
+	flag.StringVar(&url, "url", "", "URL to fetch, example: https://northflier4.streambox.com/light/light_status.php")
 	flag.DurationVar(&expectedTimeDuration, "predicted", 10*time.Minute, "Expected time for fetching the URL based of previous observations")
 	flag.DurationVar(&fetchDelay, "delay", 3*time.Second, "Delay between fetch attempts")
 	flag.IntVar(&exitCount, "count", 5, "Number of successful fetches before program exit")
 	flag.Parse()
+
+	if url == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	startTime = time.Now()
 
