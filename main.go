@@ -18,6 +18,7 @@ var (
 	startTime            time.Time
 	successCount         int
 	url                  string
+	forever              bool
 )
 
 func elapsedTime() string {
@@ -113,7 +114,7 @@ func fetch(url string) {
 	// Increment successCount if response code is 200 and exit if successCount reached 5
 	if resp.StatusCode == http.StatusOK {
 		successCount++
-		if successCount == exitCount {
+		if !forever && successCount == exitCount {
 			fmt.Printf("Exiting after %d successful fetches.\n", exitCount)
 			os.Exit(0)
 		}
@@ -125,6 +126,7 @@ func main() {
 	flag.DurationVar(&expectedTimeDuration, "predicted", 10*time.Minute, "Expected time for fetching the URL based of previous observations")
 	flag.DurationVar(&fetchDelay, "delay", 3*time.Second, "Delay between fetch attempts")
 	flag.IntVar(&exitCount, "count", 5, "Number of successful fetches before program exit")
+	flag.BoolVar(&forever, "forever", false, "Keep running indefinitely even after meeting success count")
 	flag.Parse()
 
 	if url == "" {
