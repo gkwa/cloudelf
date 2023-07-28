@@ -106,9 +106,9 @@ func fetch(url string) {
 	defer resp.Body.Close()
 
 	if untrustedCertError != nil {
-		fmt.Printf("%s (%s) HTTP Response Code: %d, %v\n", elapsedTime(), remainingTime(), resp.StatusCode, untrustedCertError)
+		fmt.Printf("%s (%s) HTTP Response Code: %d, %v for %s\n", elapsedTime(), remainingTime(), resp.StatusCode, untrustedCertError, url)
 	} else {
-		fmt.Printf("%s (%s) HTTP Response Code: %d\n", elapsedTime(), remainingTime(), resp.StatusCode)
+		fmt.Printf("%s (%s) HTTP Response Code: %d for %s\n", elapsedTime(), remainingTime(), resp.StatusCode, url)
 	}
 
 	// Increment successCount if response code is 200 and exit if successCount reached 5
