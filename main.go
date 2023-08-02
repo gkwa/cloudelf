@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -84,16 +83,18 @@ func fetch(url string) {
 		rootCAs = x509.NewCertPool()
 	}
 
-	// Read in the cert file
-	certs, err := ioutil.ReadFile(certFile)
-	if err != nil {
-		fmt.Printf("%s (%s) Failed to read cert file: %v\n", elapsedTime(), remainingTime(), err)
-		return
-	}
+	if certFile != "" {
+		// Read in the cert file
+		certs, err := os.ReadFile(certFile)
+		if err != nil {
+			fmt.Printf("%s (%s) Failed to read cert file: %v\n", elapsedTime(), remainingTime(), err)
+			return
+		}
 
-	// Append our cert to the system pool
-	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
-		fmt.Printf("%s (%s) No certs appended, using system certs only\n", elapsedTime(), remainingTime())
+		// Append our cert to the system pool
+		if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+			fmt.Printf("%s (%s) No certs appended, using system certs only\n", elapsedTime(), remainingTime())
+		}
 	}
 
 	var untrustedCertError error
@@ -148,7 +149,7 @@ func main() {
 	flag.StringVar(&certFile, "cert", "", "Path to additional cert file")
 	flag.Parse()
 
-	if url == "" || certFile == "" {
+	if url == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
