@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -19,6 +20,7 @@ var (
 	successCount         int
 	url                  string
 	forever              bool
+	certFile             string
 )
 
 func elapsedTime() string {
@@ -77,16 +79,29 @@ func fetch(url string) {
 		return
 	}
 
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+
+	// Read in the cert file
+	certs, err := ioutil.ReadFile(certFile)
+	if err != nil {
+		fmt.Printf("%s (%s) Failed to read cert file: %v\n", elapsedTime(), remainingTime(), err)
+		return
+	}
+
+	// Append our cert to the system pool
+	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+		fmt.Printf("%s (%s) No certs appended, using system certs only\n", elapsedTime(), remainingTime())
+	}
+
 	var untrustedCertError error
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
+				RootCAs: rootCAs,
 				VerifyConnection: func(cs tls.ConnectionState) error {
-					rootCAs, _ := x509.SystemCertPool()
-					if rootCAs == nil {
-						rootCAs = x509.NewCertPool()
-					}
-
 					opts := x509.VerifyOptions{
 						DNSName: cs.ServerName,
 						Roots:   rootCAs,
@@ -125,14 +140,15 @@ func fetch(url string) {
 }
 
 func main() {
-	flag.StringVar(&url, "url", "", "URL to fetch, example: https://northflier4.streambox.com/light/light_status.php")
-	flag.DurationVar(&expectedTimeDuration, "predicted", 10*time.Minute, "Expected time for fetching the URL based of previous observations")
+	flag.StringVar(&url, "url", "", "URL to fetch")
+	flag.DurationVar(&expectedTimeDuration, "predicted", 10*time.Minute, "Expected time for fetching the URL")
 	flag.DurationVar(&fetchDelay, "delay", 3*time.Second, "Delay between fetch attempts")
 	flag.IntVar(&exitCount, "count", 5, "Number of successful fetches before program exit")
 	flag.BoolVar(&forever, "forever", false, "Keep running indefinitely even after meeting success count")
+	flag.StringVar(&certFile, "cert", "", "Path to additional cert file")
 	flag.Parse()
 
-	if url == "" {
+	if url == "" || certFile == "" {
 		flag.Usage()
 		os.Exit(1)
 	}
