@@ -81,11 +81,15 @@ func fetch(url string) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
 				VerifyConnection: func(cs tls.ConnectionState) error {
+					rootCAs, _ := x509.SystemCertPool()
+					if rootCAs == nil {
+						rootCAs = x509.NewCertPool()
+					}
+
 					opts := x509.VerifyOptions{
 						DNSName: cs.ServerName,
-						Roots:   x509.NewCertPool(),
+						Roots:   rootCAs,
 					}
 
 					if _, err := cs.PeerCertificates[0].Verify(opts); err != nil {
@@ -111,7 +115,6 @@ func fetch(url string) {
 		fmt.Printf("%s (%s) HTTP Response Code: %d for %s\n", elapsedTime(), remainingTime(), resp.StatusCode, url)
 	}
 
-	// Increment successCount if response code is 200 and exit if successCount reached 5
 	if resp.StatusCode == http.StatusOK {
 		successCount++
 		if !forever && successCount == exitCount {
