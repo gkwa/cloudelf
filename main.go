@@ -88,7 +88,7 @@ func fetch(url string) {
 		certs, err := os.ReadFile(certFile)
 		if err != nil {
 			fmt.Printf("%s (%s) Failed to read cert file: %v\n", elapsedTime(), remainingTime(), err)
-			return
+			os.Exit(1) // Exiting the program when reading the certificate file fails
 		}
 
 		// Append our cert to the system pool
