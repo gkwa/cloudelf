@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -17,7 +18,7 @@ var (
 	expectedTimeDuration time.Duration
 	startTime            time.Time
 	successCount         int
-	url                  string
+	urls                 []string // Change the type of 'url' to a slice of strings
 	forever              bool
 	certFile             string
 )
@@ -141,7 +142,7 @@ func fetch(url string) {
 }
 
 func main() {
-	flag.StringVar(&url, "url", "", "URL to fetch")
+	flag.Var((*urlListFlag)(&urls), "urls", "Comma-separated list of URLs to fetch") // Use a custom flag type to handle multiple URLs
 	flag.DurationVar(&expectedTimeDuration, "predicted", 10*time.Minute, "Expected time for fetching the URL")
 	flag.DurationVar(&fetchDelay, "delay", 3*time.Second, "Delay between fetch attempts")
 	flag.IntVar(&exitCount, "count", 5, "Number of successful fetches before program exit")
@@ -149,7 +150,7 @@ func main() {
 	flag.StringVar(&certFile, "cert", "", "Path to additional cert file")
 	flag.Parse()
 
-	if url == "" {
+	if len(urls) == 0 {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -160,6 +161,23 @@ func main() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		fetch(url)
+		for _, url := range urls {
+			fetch(url)
+		}
 	}
+}
+
+// Custom flag type to handle multiple URLs separated by commas
+type urlListFlag []string
+
+func (f *urlListFlag) String() string {
+	return strings.Join(*f, ", ")
+}
+
+func (f *urlListFlag) Set(value string) error {
+	urls := strings.Split(value, ",")
+	for _, u := range urls {
+		*f = append(*f, strings.TrimSpace(u))
+	}
+	return nil
 }
