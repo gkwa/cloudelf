@@ -40,5 +40,5 @@ brews:
 - name: cloudelf
   homepage: https://github.com/taylormonacelli/homebrew-tools
   repository:
-    owner: taylormoancelli
+    owner: taylormonacelli
     name: homebrew-tools
