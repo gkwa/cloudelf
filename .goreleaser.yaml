@@ -36,3 +36,9 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+brews:
+- name: cloudelf
+  homepage: https://github.com/taylormonacelli/homebrew-tools
+  repository:
+    owner: taylormoancelli
+    name: homebrew-tools
