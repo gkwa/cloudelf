@@ -29,6 +29,8 @@ jobs:
         go test ./...
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GORELEASER }}
       with:
         args: release --snapshot --skip-publish --clean
     - name: Colored Output Test
