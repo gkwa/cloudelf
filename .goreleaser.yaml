@@ -42,4 +42,4 @@ brews:
   repository:
     owner: taylormonacelli
     name: homebrew-tools
-    token: "{{ .Env.GITHUB_PERSONAL_AUTH_TOKEN }}"
+    token: "{{ secrets.AUTH_TOKEN }}"
