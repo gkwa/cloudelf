@@ -22,7 +22,7 @@ jobs:
         distribution: goreleaser
         version: latest
         args: release --clean
-        GITHUB_TOKEN: ${{ secrets.GH_PAT_GORELEASER }}
+        GITHUB_TOKEN: ${{ secrets.GH_PAT3 }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT_GORELEASER }}
+        GITHUB_TOKEN: ${{ secrets.GH_PAT3 }}
 
