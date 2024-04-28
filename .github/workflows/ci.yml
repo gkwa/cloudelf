@@ -31,7 +31,12 @@ jobs:
       uses: goreleaser/goreleaser-action@v4
       with:
         args: release --snapshot --skip-publish --clean
+        GITHUB_TOKEN: ${{ secrets.GH_PAT_GORELEASER }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_PAT_GORELEASER }}
     - name: Colored Output Test
       if: runner.os == 'Linux'
       shell: script -q -e -c "bash {0}"
       run: go run main.go --help
+
+
